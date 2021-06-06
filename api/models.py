@@ -3,13 +3,17 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, User, 
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, first_name, last_name, email, password, **other_fields):
+    def create_user(self, first_name, last_name, email, work_mail, password, **other_fields):
         if not email:
             raise ValueError("email is required")
         if not first_name or not last_name:
             raise ValueError('First name and last name are required')
         email = self.normalize_email(email)
-        user = self.model(first_name=first_name, last_name=last_name, email=email, **other_fields)
+        user = self.model(first_name=first_name,
+                          last_name=last_name,
+                          email=email,
+                          work_mail=work_mail,
+                          **other_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -39,6 +43,7 @@ class UserModel(AbstractBaseUser):
     is_superuser = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    work_mail = models.EmailField(default=f'{first_name}.{last_name}@workmail.com')
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']
@@ -79,6 +84,15 @@ class Department(models.Model):
 
 
 class UserProfile(models.Model):
+    GENDER = [
+        ('Male', 'Male'),
+        ('Female', 'Female'),
+        ('None Binary', 'None Binary'),
+        ('Rather not say', 'Rather not say'),
+        ('Others', 'Others')
+    ]
+    DEFAULT_AVATAR = 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/1024px-User-avatar.svg.png'
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     date_of_birth = models.DateField()
     phone_number = models.IntegerField()
@@ -86,6 +100,8 @@ class UserProfile(models.Model):
     supervisor = models.ForeignKey(Supervisor, on_delete=models.DO_NOTHING)
     designation = models.ForeignKey(Designation, on_delete=models.DO_NOTHING)
     department = models.ForeignKey(Department, on_delete=models.DO_NOTHING)
+    user_avatar = models.URLField(default=DEFAULT_AVATAR)
+    gender = models.CharField(max_length=50, choices=GENDER)
 
     def __str__(self):
         return self.user.username
