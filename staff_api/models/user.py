@@ -39,7 +39,7 @@ class User(AbstractUser):
     email = models.EmailField(max_length=255, unique=True)
     avatar_url = models.URLField(default=DEFAULT_AVATAR_URL)
     salary = models.DecimalField(max_digits=10, decimal_places=2, null=True)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
